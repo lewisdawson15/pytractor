@@ -176,7 +176,7 @@ class WebDriverMixin(object):
                                                using, async=False)
         return elements
 
-    def get(self, url):
+    def get(self, url, angular):
         super(WebDriverMixin, self).get('about:blank')
         full_url = urljoin(self._base_url, url)
         self.execute_script(
@@ -188,17 +188,18 @@ class WebDriverMixin(object):
         wait = WebDriverWait(self, 10)
         wait.until_not(self._location_equals, 'about:blank')
 
-        test_result = self._test_for_angular()
-        angular_on_page = test_result[0]
-        if not angular_on_page:
-            message = test_result[1]
-            raise AngularNotFoundException(
-                'Angular could not be found on page: {}:'
-                ' {}'.format(full_url, message)
-            )
-        # TODO: inject scripts here
-        # return self.execute_script('angular.resumeBootstrap(arguments[0]);')
-        self.execute_script('angular.resumeBootstrap();')
+        if angular:
+            test_result = self._test_for_angular()
+            angular_on_page = test_result[0]
+            if not angular_on_page:
+                message = test_result[1]
+                raise AngularNotFoundException(
+                    'Angular could not be found on page: {}:'
+                    ' {}'.format(full_url, message)
+                )
+            # TODO: inject scripts here
+            # return self.execute_script('angular.resumeBootstrap(arguments[0]);')
+            self.execute_script('angular.resumeBootstrap();')
 
     def refresh(self):
         url = self.execute_script('return window.location.href')
